@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31129.286
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PH.NlogExtensions", "PH.NlogExtensions\PH.NlogExtensions.csproj", "{9F3DDF4D-A40D-45A3-AEFB-13FE5AC0D04C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PH.NlogExtensions.Test", "PH.NlogExtensions.Test\PH.NlogExtensions.Test.csproj", "{6B50250C-B1BA-45CB-BD33-CD823C07571B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{53805F1C-41C8-48EE-85BC-011A0A01CAFA}"
+	ProjectSection(SolutionItems) = preProject
+		Directory.Build.props = Directory.Build.props
+		..\..\README.md = ..\..\README.md
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9F3DDF4D-A40D-45A3-AEFB-13FE5AC0D04C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9F3DDF4D-A40D-45A3-AEFB-13FE5AC0D04C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9F3DDF4D-A40D-45A3-AEFB-13FE5AC0D04C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9F3DDF4D-A40D-45A3-AEFB-13FE5AC0D04C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6B50250C-B1BA-45CB-BD33-CD823C07571B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6B50250C-B1BA-45CB-BD33-CD823C07571B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6B50250C-B1BA-45CB-BD33-CD823C07571B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6B50250C-B1BA-45CB-BD33-CD823C07571B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {059C947B-ABF6-4C08-8655-119C806FEFFB}
+	EndGlobalSection
+EndGlobal
