@@ -1,0 +1,49 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+
+
+    <PackageId>PH.NlogExtensions</PackageId>
+    
+    <Description>A tiny c# class for extend Nlog </Description>
+    <PackageReleaseNotes>
+      First Release
+    </PackageReleaseNotes>
+
+    
+    <PackageTags>nLog,logFile</PackageTags>
+
+    
+    <Authors>Paolo Innocenti</Authors>
+    
+    <RepositoryUrl>https://github.com/paonath/PH.NlogExtensions</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/paonath/PH.NlogExtensions</PackageProjectUrl>
+
+
+    <PackageLicenseExpression>BSD-3-Clause</PackageLicenseExpression>
+    
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <DocumentationFile>.\PH.NlogExtensions.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NLog" Version="[4.7.6,)" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="PH.NlogExtensions.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

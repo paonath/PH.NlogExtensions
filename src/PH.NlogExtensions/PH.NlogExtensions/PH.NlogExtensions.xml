@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>PH.NlogExtensions</name>
+    </assembly>
+    <members>
+        <member name="T:PH.NlogExtensions.LogfileExtensions">
+            <summary>
+            Log-File Extensions
+            </summary>
+        </member>
+        <member name="M:PH.NlogExtensions.LogfileExtensions.ReadCurrentLogFile(NLog.Logger,System.String)">
+            <summary>Reads the current log file.</summary>
+            <param name="nlogLogger">The nlog logger.</param>
+            <param name="targetFileName">Name of the target file.</param>
+            <returns></returns>
+        </member>
+        <member name="M:PH.NlogExtensions.LogfileExtensions.GetCurrentLogFile(NLog.Logger,System.String)">
+            <summary>Gets the current log file.</summary>
+            <param name="nlogLogger">The nlog logger.</param>
+            <param name="targetFileName">Name of the target file.</param>
+            <returns></returns>
+            <exception cref="T:System.ArgumentNullException">nlogLogger</exception>
+            <exception cref="T:System.ArgumentException">
+            Value cannot be null or empty. - targetFileName
+            or
+            Not found target with name '{targetFileName}' - targetFileName
+            </exception>
+        </member>
+    </members>
+</doc>
