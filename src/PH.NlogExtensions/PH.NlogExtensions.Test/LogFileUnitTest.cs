@@ -1,11 +1,27 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using NLog;
+using NLog.Targets;
 using Xunit;
 
 namespace PH.NlogExtensions.Test
 {
     public class LogFileUnitTest : UnitTest
     {
+
+       
+        [Fact]
+        public void CycleOverAllFileTargets()
+        {
+            Logger.Info("A message");
+            var d = Logger.GetAllCurrentLogFiles().GetAwaiter().GetResult();
+
+           
+
+            Assert.True(d.Keys.Count == 2);
+        }
+
         [Fact]
         public void TestEmptyLogger()
         {
