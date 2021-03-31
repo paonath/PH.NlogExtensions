@@ -7,9 +7,15 @@ using NLog.Targets;
 
 namespace PH.NlogExtensions
 {
+    /// <summary>
+    /// Log-File Extensions
+    /// </summary>
     public static class LogfileExtensions
     {
-
+        /// <summary>Reads the current log file.</summary>
+        /// <param name="nlogLogger">The nlog logger.</param>
+        /// <param name="targetFileName">Name of the target file.</param>
+        /// <returns></returns>
         public static async Task<string> ReadCurrentLogFile(this NLog.Logger nlogLogger, string targetFileName)
         {
             var bytes = await GetCurrentLogFile(nlogLogger, targetFileName);
@@ -21,6 +27,16 @@ namespace PH.NlogExtensions
             return Encoding.UTF8.GetString(bytes, 0, bytes.Length);
         }
 
+        /// <summary>Gets the current log file.</summary>
+        /// <param name="nlogLogger">The nlog logger.</param>
+        /// <param name="targetFileName">Name of the target file.</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException">nlogLogger</exception>
+        /// <exception cref="ArgumentException">
+        /// Value cannot be null or empty. - targetFileName
+        /// or
+        /// Not found target with name '{targetFileName}' - targetFileName
+        /// </exception>
         public static async Task<byte[]> GetCurrentLogFile(this NLog.Logger nlogLogger, string targetFileName)
         {
             if (nlogLogger is null)
