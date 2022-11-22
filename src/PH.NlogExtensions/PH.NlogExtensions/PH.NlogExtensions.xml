@@ -65,22 +65,22 @@
             <summary>Repository URL: git@github.com:paonath/PH.NlogExtensions.git</summary>
         </member>
         <member name="F:ThisAssembly.Git.Branch">
-            <summary>Branch: feature/download_current_logs_as_zip</summary>
+            <summary>Branch: release/download_current_logs_as_zip</summary>
         </member>
         <member name="F:ThisAssembly.Git.Commit">
-            <summary>Commit: 898bf43</summary>
+            <summary>Commit: 3dbcad5</summary>
         </member>
         <member name="F:ThisAssembly.Git.Sha">
-            <summary>Sha: 898bf4319e1d02050ef5232e73e3793bd7c092f0</summary>
+            <summary>Sha: 3dbcad583c3521023bb713d366ba29d05eea0ff0</summary>
         </member>
         <member name="F:ThisAssembly.Git.CommitDate">
-            <summary>Commit date: 2022-11-22T10:57:14+01:00</summary>
+            <summary>Commit date: 2022-11-22T13:13:36+01:00</summary>
         </member>
         <member name="F:ThisAssembly.Git.Commits">
-            <summary>Commits on top of base version: 4</summary>
+            <summary>Commits on top of base version: 6</summary>
         </member>
         <member name="F:ThisAssembly.Git.Tag">
-            <summary>Tag: v0.0.2-4-g898bf43</summary>
+            <summary>Tag: v0.0.2-6-g3dbcad5</summary>
         </member>
         <member name="F:ThisAssembly.Git.BaseTag">
             <summary>Base tag: v0.0.2</summary>
@@ -107,7 +107,7 @@
             <summary>Minor: 0</summary>
         </member>
         <member name="F:ThisAssembly.Git.SemVer.Patch">
-            <summary>Patch: 6</summary>
+            <summary>Patch: 8</summary>
         </member>
         <member name="F:ThisAssembly.Git.SemVer.Label">
             <summary>Label: </summary>
