@@ -1,22 +1,20 @@
 <Project>
   <PropertyGroup>
     <Authors>Paolo Innocenti</Authors>
-    <Copyright>Copyright 2021 (c) Paolo Innocenti - paonath@gmail.com </Copyright>    
-    <AssemblyVersion>0.0.2</AssemblyVersion>
-    <FileVersion>0.0.2</FileVersion>
-    <Version>0.0.2</Version>
-    <PackageVersion>0.0.2</PackageVersion>
-    <PackageReleaseNotes>
-      Cycle over all file targets
-    </PackageReleaseNotes>
+    <Copyright>Copyright $([System.DateTime]::UtcNow.ToString("yyyy")) (c) Paolo Innocenti - paonath@gmail.com </Copyright>    
+    <AssemblyVersion>0.0.3</AssemblyVersion>
+    <FileVersion>0.0.3</FileVersion>
+    <Version>0.0.3</Version>
+    <PackageVersion>0.0.3</PackageVersion>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)'=='Debug'">
-    <SourceRevisionId>build-$([System.DateTime]::UtcNow.ToString("yyyyMMddHHmmss"))</SourceRevisionId>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)'=='Release'">
-    <SourceRevisionId>rel-$([System.DateTime]::UtcNow.ToString("yyyyMMdd"))</SourceRevisionId>
-  </PropertyGroup>
+  <Target Name="PopulateInfo" DependsOnTargets="GitInfo" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <RepositoryBranch>$(GitBranch)</RepositoryBranch>
+      <RepositoryCommit>$(GitCommit)</RepositoryCommit>
+      <RepositoryTag>$(GitBaseTag)</RepositoryTag>
+      <SourceRevisionId>$(Configuration) $([System.DateTime]::UtcNow.ToString("yyyyMMdd"))_$(GitCommit)_$(GitBaseTag)</SourceRevisionId>
+    </PropertyGroup>
+  </Target>
 
 </Project>
