@@ -10,9 +10,7 @@
     <PackageId>PH.NlogExtensions</PackageId>
     
     <Description>A tiny c# class for extend Nlog </Description>
-    <PackageReleaseNotes>
-      First Release
-    </PackageReleaseNotes>
+    
 
     
     <PackageTags>nLog,logFile</PackageTags>
@@ -37,6 +35,7 @@
 
   <ItemGroup>
     <PackageReference Include="NLog" Version="[4.7.6,)" />
+    <!--<PackageReference Include="DotNetZip.NetStandard" Version="1.12.0"  />-->
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
   </ItemGroup>
 

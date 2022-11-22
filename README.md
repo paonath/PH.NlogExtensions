@@ -8,7 +8,17 @@
 **GetCurrentLogFile(string targetFileName)**
 ```csharp
 
-// bytes are the content of current target named 'full'
+//assume Logger is NLog.Logger
+// bytes is he content of current target named 'full'
 var bytes = await Logger.GetCurrentLogFile("full");
+
+```
+
+**CycleOverAllFileTargets()**
+```csharp
+
+//assume Logger is NLog.Logger
+// dict is a Dictionary<string,byte[]> where Key = TargetName and Value = content
+var dict = await Logger.GetAllCurrentLogFiles();
 
 ```

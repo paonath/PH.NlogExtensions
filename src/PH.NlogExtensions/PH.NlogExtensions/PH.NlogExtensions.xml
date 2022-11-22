@@ -27,5 +27,27 @@
             Not found target with name '{targetFileName}' - targetFileName
             </exception>
         </member>
+        <member name="M:PH.NlogExtensions.LogfileExtensions.GetLogFileByTarget(NLog.Targets.FileTarget)">
+            <summary>Gets the log file by target.</summary>
+            <param name="fileTarget">The file target.</param>
+            <returns></returns>
+        </member>
+        <member name="M:PH.NlogExtensions.LogfileExtensions.GetCurrentLogFileByFileTarget(NLog.Logger,NLog.Targets.FileTarget)">
+            <summary>Gets the current log file by file target.</summary>
+            <param name="nlogLogger">The nlog logger.</param>
+            <param name="fileTarget">The file target.</param>
+            <returns></returns>
+            <exception cref="T:System.ArgumentNullException">
+            nlogLogger
+            or
+            fileTarget
+            </exception>
+        </member>
+        <member name="M:PH.NlogExtensions.LogfileExtensions.GetAllCurrentLogFiles(NLog.Logger)">
+            <summary>Gets the current log files.</summary>
+            <param name="nlogLogger">The nlog logger.</param>
+            <returns></returns>
+            <exception cref="T:System.ArgumentNullException">nlogLogger</exception>
+        </member>
     </members>
 </doc>
