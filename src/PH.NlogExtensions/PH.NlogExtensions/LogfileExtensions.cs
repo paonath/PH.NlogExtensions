@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
-
+using Ionic.Zip;
+using Ionic.Zlib;
 using NLog;
 using NLog.Targets;
 
@@ -15,15 +17,60 @@ namespace PH.NlogExtensions
     public static class LogfileExtensions
     {
 
+	    #region ZIP
+
+	    public static async Task<byte[]> GetCurrentLogFilesAsZip(this NLog.Logger nLogger, CancellationToken token)
+	    {
+		    using (var m = await GetCurrentLogFilesAsZipMemoryStream(nLogger, token))
+		    {
+			    return m.ToArray();
+		    }
+		    
+	    }
+
+
+
+	    public static async Task<MemoryStream> GetCurrentLogFilesAsZipMemoryStream(this NLog.Logger nLogger,
+		    CancellationToken token)
+	    {
+		    var logs   = await GetAllCurrentLogFilesWithInfo(nLogger, token);
+		    var memory = new MemoryStream();
+		    
+			    using (var zip = new Ionic.Zip.ZipFile())
+			    {
+				    foreach (var keyValuePair in logs)
+				    {
+					    var eName = keyValuePair.Key.Name;
+					    if (!eName.EndsWith(keyValuePair.Key.Extension, StringComparison.InvariantCultureIgnoreCase))
+					    {
+
+						    eName = $"{eName}{keyValuePair.Key.Extension}";
+					    }
+					    zip.AddEntry(eName, keyValuePair.Value);
+				    }
+
+				    zip.CompressionLevel  = CompressionLevel.BestCompression;
+				    zip.CompressionMethod = CompressionMethod.BZip2;
+
+				    zip.Save(memory);
+				    memory.Position = 0;
+				    return memory;
+			    }
+		    
+	    }
+
+
+	    #endregion
 
 
         /// <summary>Reads the current log file.</summary>
         /// <param name="nlogLogger">The nlog logger.</param>
         /// <param name="targetFileName">Name of the target file.</param>
         /// <returns></returns>
-        public static async Task<string> ReadCurrentLogFile(this NLog.Logger nlogLogger, string targetFileName)
+        public static async Task<string> ReadCurrentLogFile(this NLog.Logger nlogLogger, string targetFileName,
+                                                            CancellationToken token)
         {
-            var bytes = await GetCurrentLogFile(nlogLogger, targetFileName);
+            var bytes = await GetCurrentLogFile(nlogLogger, targetFileName, token);
             if (bytes.Length == 0)
             {
                 return null;
@@ -42,7 +89,8 @@ namespace PH.NlogExtensions
         /// or
         /// Not found target with name '{targetFileName}' - targetFileName
         /// </exception>
-        public static async Task<byte[]> GetCurrentLogFile(this NLog.Logger nlogLogger, string targetFileName)
+        public static async Task<byte[]> GetCurrentLogFile(this NLog.Logger nlogLogger, string targetFileName,
+                                                           CancellationToken token)
         {
             if (nlogLogger is null)
             {
@@ -63,7 +111,7 @@ namespace PH.NlogExtensions
                                             nameof(targetFileName));
             }
 
-            return await GetCurrentLogFileByFileTarget(nlogLogger, fileTarget);
+            return await GetCurrentLogFileByFileTarget(nlogLogger, fileTarget, token);
 
         }
 
@@ -96,14 +144,16 @@ namespace PH.NlogExtensions
         /// or
         /// fileTarget
         /// </exception>
-        public static async Task<byte[]> GetCurrentLogFileByFileTarget(this NLog.Logger nlogLogger, FileTarget fileTarget)
+        public static async Task<byte[]> GetCurrentLogFileByFileTarget(this NLog.Logger nlogLogger, FileTarget fileTarget,
+                                                                       CancellationToken token)
         {
-            var r = await GetCurrentDataAndFileInfoByFileTarget(nlogLogger, fileTarget);
+            var r = await GetCurrentDataAndFileInfoByFileTarget(nlogLogger, fileTarget, token);
             return r.Data;
         }
 
-        private static async Task<(byte[] Data, FileInfo File)> GetCurrentDataAndFileInfoByFileTarget(
-            NLog.Logger nlogLogger, FileTarget fileTarget)
+				
+
+        private static async Task<(byte[] Data, FileInfo File)> GetCurrentDataAndFileInfoByFileTarget(NLog.Logger nlogLogger, FileTarget fileTarget, CancellationToken token)
         {
             if (nlogLogger is null)
             {
@@ -126,7 +176,7 @@ namespace PH.NlogExtensions
             {
                 using (var m = new MemoryStream())
                 {
-                    await stream.CopyToAsync(m);
+                    await stream.CopyToAsync(m, 81920, token);
                     m.Position = 0;
                     return (m.ToArray(), file);
                 }
@@ -139,58 +189,39 @@ namespace PH.NlogExtensions
         /// <param name="nlogLogger">The nlog logger.</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">nlogLogger</exception>
-        public static async Task<Dictionary<string,byte[]>> GetAllCurrentLogFiles(this NLog.Logger nlogLogger)
+        public static async Task<Dictionary<string,byte[]>> GetAllCurrentLogFiles(this NLog.Logger nlogLogger, CancellationToken token)
         {
-            if (nlogLogger is null)
-            {
-                throw new ArgumentNullException(nameof(nlogLogger));
-            }
+	        var d = new Dictionary<string, byte[]>();
+	        var r = await GetAllCurrentLogFilesWithInfo(nlogLogger, token);
+          foreach (var keyValuePair in r)
+          {
+	          d.Add(keyValuePair.Key.Name, keyValuePair.Value);
+          }
 
-            var d = new Dictionary<string, byte[]>();
-            foreach (var configurationAllTarget in LogManager.Configuration.AllTargets)
-            {
-                if (configurationAllTarget is FileTarget fileTarget)
-                {
-                    var bytes = await GetCurrentLogFileByFileTarget(nlogLogger, fileTarget);
-                    d.Add(fileTarget.Name, bytes);
-                }
-            }
-
-            return d;
+          return d;
         }
 
-        ///// <summary>Gets the current log files as zip.</summary>
-        ///// <param name="nlogLogger">The nlog logger.</param>
-        ///// <returns></returns>
-        ///// <exception cref="ArgumentNullException">nlogLogger</exception>
-        //public static async Task<byte[]> GetCurrentLogFilesAsZip(this NLog.Logger nlogLogger)
-        //{
-        //    if (nlogLogger is null)
-        //    {
-        //        throw new ArgumentNullException(nameof(nlogLogger));
-        //    }
+        public static async Task<Dictionary<FileInfo, byte[]>> GetAllCurrentLogFilesWithInfo(this NLog.Logger nlogLogger, CancellationToken token)
+        {
+	        if (nlogLogger is null)
+	        {
+		        throw new ArgumentNullException(nameof(nlogLogger));
+	        }
+
+	        var d = new Dictionary<FileInfo, byte[]>();
+	        foreach (var configurationAllTarget in LogManager.Configuration.AllTargets)
+	        {
+		        if (configurationAllTarget is FileTarget fileTarget)
+		        {
+			        var data = await GetCurrentDataAndFileInfoByFileTarget(nlogLogger, fileTarget, token);
+			        d.Add(data.File, data.Data);
+		        }
+	        }
+
+	        return d;
+        }
 
 
-        //    using (var m = new MemoryStream())
-        //    {
-        //        using (ZipFile zip = new ZipFile())
-        //        {
-        //            foreach (var configurationAllTarget in LogManager.Configuration.AllTargets)
-        //            {
-        //                if (configurationAllTarget is FileTarget fileTarget)
-        //                {
-        //                    var bytes = await GetCurrentDataAndFileInfoByFileTarget(nlogLogger, fileTarget);
-        //                    zip.AddEntry(bytes.File.Name, bytes.Data);
-        //                }
-        //            }
-
-        //            zip.Save(m);
-        //            m.Position = 0;
-        //            return m.ToArray();
-        //        }
-        //    }
-            
-        //}
     }
 }
 
