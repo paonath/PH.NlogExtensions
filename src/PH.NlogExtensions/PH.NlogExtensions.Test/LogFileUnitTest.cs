@@ -88,5 +88,12 @@ namespace PH.NlogExtensions.Test
             Assert.True(!string.IsNullOrEmpty(stringText));
         }
 
+
+        [Fact]
+        public void CycleOverFileTargets()
+        {
+
+        }
+
     }
 }
