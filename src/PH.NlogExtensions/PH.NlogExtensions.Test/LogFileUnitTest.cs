@@ -32,8 +32,8 @@ namespace PH.NlogExtensions.Test
 	        Logger.Fatal(e, "A Fatal with exception: {Message}", e.Message);
         }
 
-		    var               d     = Logger.GetCurrentLogFilesAsZip(token).GetAwaiter().GetResult();
-		    var               s     = Logger.GetCurrentLogFilesAsZipMemoryStream(token).GetAwaiter().GetResult();
+		    var               d     = Logger.GetCurrentLogFilesAsZipAsync(token).GetAwaiter().GetResult();
+		    var               s     = Logger.GetCurrentLogFilesAsZipMemoryStreamAsync(token).GetAwaiter().GetResult();
 
 
 		    int count = 0;
@@ -63,7 +63,7 @@ namespace PH.NlogExtensions.Test
         public void CycleOverAllFileTargets()
         {
             Logger.Info("A message");
-            var d = Logger.GetAllCurrentLogFiles(token).GetAwaiter().GetResult();
+            var d = Logger.GetAllCurrentLogFilesAsync(token).GetAwaiter().GetResult();
 
            
 
@@ -79,8 +79,8 @@ namespace PH.NlogExtensions.Test
 
 
 
-            var bytes      = Logger.GetCurrentLogFile("full", token).GetAwaiter().GetResult();
-            var stringText = Logger.ReadCurrentLogFile("full", token).GetAwaiter().GetResult();
+            var bytes      = Logger.GetCurrentLogFileAsync("full", token).GetAwaiter().GetResult();
+            var stringText = Logger.ReadCurrentLogFileAsync("full", token).GetAwaiter().GetResult();
             Assert.True(bytes.Length == 0);
             Assert.True(stringText == null);
 
@@ -95,7 +95,7 @@ namespace PH.NlogExtensions.Test
             Exception nullFound = null;
             try
             {
-                var bytes = Logger.GetCurrentLogFile("full", token).GetAwaiter().GetResult();
+                var bytes = Logger.GetCurrentLogFileAsync("full", token).GetAwaiter().GetResult();
             }
             catch (Exception e)
             {
@@ -112,7 +112,7 @@ namespace PH.NlogExtensions.Test
             Exception notFound = null;
             try
             {
-                var bytes = Logger.GetCurrentLogFile("", token).GetAwaiter().GetResult();
+                var bytes = Logger.GetCurrentLogFileAsync("", token).GetAwaiter().GetResult();
             }
             catch (Exception e)
             {
@@ -128,7 +128,7 @@ namespace PH.NlogExtensions.Test
             Exception notFound = null;
             try
             {
-                var bytes = Logger.GetCurrentLogFile("A fake appender target", token).GetAwaiter().GetResult();
+                var bytes = Logger.GetCurrentLogFileAsync("A fake appender target", token).GetAwaiter().GetResult();
             }
             catch (Exception e)
             {
@@ -144,8 +144,8 @@ namespace PH.NlogExtensions.Test
 
             Logger.Info("A message");
 
-            var bytes      = Logger.GetCurrentLogFile("full", token).GetAwaiter().GetResult();
-            var stringText = Logger.ReadCurrentLogFile("full", token).GetAwaiter().GetResult();
+            var bytes      = Logger.GetCurrentLogFileAsync("full", token).GetAwaiter().GetResult();
+            var stringText = Logger.ReadCurrentLogFileAsync("full", token).GetAwaiter().GetResult();
 
 
             Assert.NotEmpty(bytes);
