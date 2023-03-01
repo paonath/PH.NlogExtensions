@@ -17,6 +17,19 @@ namespace PH.NlogExtensions.TestFw48
             Logger                        = NLog.LogManager.GetCurrentClassLogger();
         }
 
+
+        [TestMethod]
+        public void GetWholeLogDirectory()
+        {
+            Logger.Info("A message");
+
+            var bytes = Logger.GetWholeLogDirectoryAsZip();
+            System.IO.File.WriteAllBytes($@".\lg{DateTime.Now:yymmddHHmmss}.zip", bytes);
+            Assert.IsNotNull(bytes);
+            Assert.IsTrue(bytes.Length > 0);
+
+        }
+
         [TestMethod]
         public void GetZipFileReturnByteArray()
         {
