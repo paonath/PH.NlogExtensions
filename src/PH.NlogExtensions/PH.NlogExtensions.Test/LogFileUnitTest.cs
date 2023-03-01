@@ -87,6 +87,20 @@ namespace PH.NlogExtensions.Test
         }
 
         [Fact]
+        public void GetWholeLogDirectory()
+        {
+            Logger.Info("A message");
+
+            var bytes = Logger.GetWholeLogDirectoryAsZipAsync().GetAwaiter().GetResult();
+            System.IO.File.WriteAllBytes($@".\lg{DateTime.Now:yymmddHHmmss}.zip", bytes);
+            
+            Assert.NotNull(bytes);
+            Assert.True(bytes.Length > 0);
+
+        }
+
+
+        [Fact]
         public void GetCurrentLogFileOnNullLoggerWillTrhowException()
         {
             Logger.Info("A message");
