@@ -8,13 +8,6 @@
     <PackageVersion>0.0.5</PackageVersion>
   </PropertyGroup>
 
-  <Target Name="PopulateInfo" DependsOnTargets="GitInfo" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <RepositoryBranch>$(GitBranch)</RepositoryBranch>
-      <RepositoryCommit>$(GitCommit)</RepositoryCommit>
-      <RepositoryTag>$(GitBaseTag)</RepositoryTag>
-      <SourceRevisionId>$(Configuration) $([System.DateTime]::UtcNow.ToString("yyyyMMdd"))_$(GitCommit)_$(GitBaseTag)</SourceRevisionId>
-    </PropertyGroup>
-  </Target>
+  
 
 </Project>
