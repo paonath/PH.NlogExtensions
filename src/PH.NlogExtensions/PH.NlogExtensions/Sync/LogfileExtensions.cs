@@ -6,11 +6,11 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
-using Ionic.Zip;
-using Ionic.Zlib;
 using NLog;
 using NLog.Targets;
+using PH.CompressionUtility;
 
 #endregion
 
@@ -58,29 +58,14 @@ namespace PH.NlogExtensions
             var logs   = GetAllCurrentLogFilesWithInfo(nLogger);
             var memory = new MemoryStream();
 
-            using (var zip = new ZipFile())
-            {
-                foreach (var keyValuePair in logs)
-                {
-                    var eName = keyValuePair.Key.Name;
-                    if (!eName.EndsWith(keyValuePair.Key.Extension, StringComparison.InvariantCultureIgnoreCase))
-                    {
-                        eName = $"{eName}{keyValuePair.Key.Extension}";
-                    }
+            var files = logs.Select(x => x.Key).ToArray();
+            var zipStream =  files.ToZipStreamAsync(CancellationToken.None).GetAwaiter().GetResult();
+            zipStream.Position = 0;
+            zipStream.CopyTo(memory);
+            memory.Position = 0;
+            return memory;
 
-                    zip.AddEntry(eName, keyValuePair.Value);
-                }
-
-                zip.CompressionLevel  = CompressionLevel.BestCompression;
-                zip.CompressionMethod = CompressionMethod.BZip2;
-
-                zip.Comment =
-                    $"Logs request from CallerMemberName '{memberName}' at {DateTime.UtcNow:O} UTC - CallerFilePath '{filePath}' - LineNumber {lineNo}";
-
-                zip.Save(memory);
-                memory.Position = 0;
-                return memory;
-            }
+            
         }
 
         /// <summary>
@@ -137,23 +122,11 @@ namespace PH.NlogExtensions
                 }
             }
 
-            using (var zip = new ZipFile())
-            {
-                foreach (var dir in d)
-                {
-                    zip.AddDirectory(dir.Value.FullName);
-                }
-
-                zip.CompressionLevel  = CompressionLevel.BestCompression;
-                zip.CompressionMethod = CompressionMethod.BZip2;
-
-                zip.Comment =
-                    $"Logs request from CallerMemberName '{memberName}' at {DateTime.UtcNow:O} UTC - CallerFilePath '{filePath}' - LineNumber {lineNo}";
-
-                zip.Save(memory);
-                memory.Position = 0;
-                return memory;
-            }
+            var zip = d.Select(x => x.Value).ToZipStreamAsync(CancellationToken.None).GetAwaiter().GetResult();
+            zip.Position = 0;
+            zip.CopyTo(memory);
+            memory.Position = 0;
+            return memory;
         }
 
         #endregion
@@ -216,15 +189,7 @@ namespace PH.NlogExtensions
             var getInfo  = new LogEventInfo { TimeStamp = DateTime.UtcNow, Level = LogLevel.Off };
             var fileName = fileTarget.FileName.Render(getInfo);
 
-            //string path = fileName;
-            //if (!System.IO.Path.IsPathRooted(fileName))
-            //{
-            //    var dir = AppContext.BaseDirectory;
-            //    path = Path.Combine(dir, fileName);
-
-            //}
-
-            //var info = new FileInfo(path);
+           
 
             return new FileInfo(fileName);
         }

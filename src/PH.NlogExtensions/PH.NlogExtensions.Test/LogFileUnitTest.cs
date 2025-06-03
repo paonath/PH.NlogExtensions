@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Threading;
-using Ionic.Zip;
+
 using NLog;
 using NLog.Targets;
 using Xunit;
@@ -37,14 +38,17 @@ namespace PH.NlogExtensions.Test
 
 
 		    int count = 0;
-		    using (ZipFile z = ZipFile.Read(s))
-		    {
+            
+            ZipArchive z = new ZipArchive(s, ZipArchiveMode.Read);
+
+            
 			    foreach (var zipEntry in z.Entries)
 			    {
 				    count++;
             
 			    }
-		    }
+		    
+        z.Dispose();
         
         Guid g = Guid.NewGuid();
         System.IO.File.WriteAllBytes($".\\{g}.zip", d);
