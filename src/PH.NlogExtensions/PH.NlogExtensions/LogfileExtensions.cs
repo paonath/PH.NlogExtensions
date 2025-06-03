@@ -3,15 +3,16 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Ionic.Zip;
-using Ionic.Zlib;
+
 using NLog;
 using NLog.Targets;
+using PH.CompressionUtility;
 
 #endregion
 
@@ -63,8 +64,8 @@ namespace PH.NlogExtensions
             }
 
             var memory = new MemoryStream();
-            using (var internalMem = new MemoryStream())
-            {
+            //using (var internalMem = new MemoryStream())
+            //{
                 var d = new Dictionary<string, DirectoryInfo>();
                 foreach (var configurationAllTarget in LogManager.Configuration.AllTargets)
                 {
@@ -81,25 +82,12 @@ namespace PH.NlogExtensions
                     }
                 }
 
-                using (var zip = new ZipFile())
-                {
-                    foreach (var dir in d)
-                    {
-                        zip.AddDirectory(dir.Value.FullName);
-                    }
-
-                    zip.CompressionLevel  = CompressionLevel.BestCompression;
-                    zip.CompressionMethod = CompressionMethod.BZip2;
-
-                    zip.Comment =
-                        $"Logs request from CallerMemberName '{memberName}' at {DateTime.UtcNow:O} UTC - CallerFilePath '{filePath}' - LineNumber {lineNo}";
-
-                    zip.Save(internalMem);
-                    internalMem.Position = 0;
-                    await internalMem.CopyToAsync(memory);
-                    memory.Position = 0;
-                }
-            }
+                var zipStream = await d.Select(x => x.Value).ToZipStreamAsync(CancellationToken.None);
+                zipStream.Position = 0;
+                await zipStream.CopyToAsync(memory);
+                memory.Position = 0;
+               
+            //}
 
 
             return memory;
@@ -142,29 +130,11 @@ namespace PH.NlogExtensions
             var logs   = await GetAllCurrentLogFilesWithInfoAsync(nLogger, token);
             var memory = new MemoryStream();
 
-            using (var zip = new ZipFile())
-            {
-                foreach (var keyValuePair in logs)
-                {
-                    var eName = keyValuePair.Key.Name;
-                    if (!eName.EndsWith(keyValuePair.Key.Extension, StringComparison.InvariantCultureIgnoreCase))
-                    {
-                        eName = $"{eName}{keyValuePair.Key.Extension}";
-                    }
+            var zipStream = await logs.Select(x => x.Key).ToZipStreamAsync(token);
+            zipStream.Position = 0;
+            await zipStream.CopyToAsync(memory);
 
-                    zip.AddEntry(eName, keyValuePair.Value);
-                }
-
-                zip.CompressionLevel  = CompressionLevel.BestCompression;
-                zip.CompressionMethod = CompressionMethod.BZip2;
-
-                zip.Comment =
-                    $"Logs request from CallerMemberName '{memberName}' at {DateTime.UtcNow:O} UTC - CallerFilePath '{filePath}' - LineNumber {lineNo}";
-
-                zip.Save(memory);
-                memory.Position = 0;
-                return memory;
-            }
+            return memory;
         }
 
         #endregion
@@ -231,14 +201,7 @@ namespace PH.NlogExtensions
             var getInfo  = new LogEventInfo { TimeStamp = DateTime.UtcNow, Level = LogLevel.Off };
             var fileName = fileTarget.FileName.Render(getInfo);
 
-            //string path = fileName;
-            //if (!System.IO.Path.IsPathRooted(fileName))
-            //{
-            //    var dir = AppContext.BaseDirectory;
-            //    path = Path.Combine(dir, fileName);
-
-            //}
-
+           
             //var info = new FileInfo(path);
             var info = new FileInfo(fileName);
             return info;
