@@ -349,3 +349,6 @@ MigrationBackup/
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
 src/PH.NlogExtensions/PH.NlogExtensions/PH.NlogExtensions.xml
+src/PH.NlogExtensions/.sonarqube/conf/Sonar-cs.ruleset
+src/PH.NlogExtensions/dotCover.Output/
+src/PH.NlogExtensions/.sonarqube/
