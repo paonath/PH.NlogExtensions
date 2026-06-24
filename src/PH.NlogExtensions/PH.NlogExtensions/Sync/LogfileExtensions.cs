@@ -25,13 +25,13 @@ namespace PH.NlogExtensions
         #region ZIP
 
         /// <summary>
-        ///     Get the current log file collection as zip archive
+        /// Gets the current log files and compresses them into a ZIP archive, returning it as a byte array.
         /// </summary>
-        /// <param name="nLogger">The configured logger</param>
-        /// <param name="memberName">CallerMemberName</param>
-        /// <param name="filePath">CallerFilePath</param>
-        /// <param name="lineNo">CallerLineNumber</param>
-        /// <returns>Byte Array with zip</returns>
+        /// <param name="nLogger">The NLog logger instance.</param>
+        /// <param name="memberName">The caller member name.</param>
+        /// <param name="filePath">The caller file path.</param>
+        /// <param name="lineNo">The caller line number.</param>
+        /// <returns>The ZIP archive as a byte array.</returns>
         public static byte[] GetCurrentLogFilesAsZip(this Logger nLogger, [CallerMemberName] string memberName = "",
                                                      [CallerFilePath] string filePath = "",
                                                      [CallerLineNumber] int lineNo = 0)
@@ -44,13 +44,13 @@ namespace PH.NlogExtensions
 
 
         /// <summary>
-        ///     Get the current log file collection as zip archive
+        /// Gets the current log files and compresses them into a ZIP archive, returning it as a memory stream.
         /// </summary>
-        /// <param name="nLogger">The configured logger</param>
-        /// <param name="memberName">CallerMemberName</param>
-        /// <param name="filePath">CallerFilePath</param>
-        /// <param name="lineNo">CallerLineNumber</param>
-        /// <returns>MemoryStream with zip</returns>
+        /// <param name="nLogger">The NLog logger instance.</param>
+        /// <param name="memberName">The caller member name.</param>
+        /// <param name="filePath">The caller file path.</param>
+        /// <param name="lineNo">The caller line number.</param>
+        /// <returns>The ZIP archive as a <see cref="MemoryStream"/>.</returns>
         public static MemoryStream GetCurrentLogFilesAsZipMemoryStream(this Logger nLogger,
                                                                        [CallerMemberName] string memberName = "",
                                                                        [CallerFilePath] string filePath = "",
@@ -70,13 +70,13 @@ namespace PH.NlogExtensions
         }
 
         /// <summary>
-        /// Gets the whole log directory and zip.
+        /// Gets the entire log directory and compresses it into a ZIP archive, returning it as a byte array.
         /// </summary>
-        /// <param name="nLogger">The n logger.</param>
-        /// <param name="memberName">Name of the member.</param>
-        /// <param name="filePath">The file path.</param>
-        /// <param name="lineNo">The line no.</param>
-        /// <returns></returns>
+        /// <param name="nLogger">The NLog logger instance.</param>
+        /// <param name="memberName">The caller member name.</param>
+        /// <param name="filePath">The caller file path.</param>
+        /// <param name="lineNo">The caller line number.</param>
+        /// <returns>The ZIP archive as a byte array.</returns>
         public static byte[] GetWholeLogDirectoryAsZip(this Logger nLogger, [CallerMemberName] string memberName = "",
                                                        [CallerFilePath] string filePath = "",
                                                        [CallerLineNumber] int lineNo = 0)
@@ -87,14 +87,14 @@ namespace PH.NlogExtensions
             }
         }
         /// <summary>
-        /// Gets the whole log directory and zip as stream.
+        /// Gets the entire log directory and compresses it into a ZIP archive, returning it as a memory stream.
         /// </summary>
-        /// <param name="nLogger">The n logger.</param>
-        /// <param name="memberName">Name of the member.</param>
-        /// <param name="filePath">The file path.</param>
-        /// <param name="lineNo">The line no.</param>
-        /// <returns></returns>
-        /// <exception cref="System.ArgumentNullException">nLogger</exception>
+        /// <param name="nLogger">The NLog logger instance.</param>
+        /// <param name="memberName">The caller member name.</param>
+        /// <param name="filePath">The caller file path.</param>
+        /// <param name="lineNo">The caller line number.</param>
+        /// <returns>The ZIP archive as a <see cref="MemoryStream"/>.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="nLogger"/> is null.</exception>
         public static MemoryStream GetWholeLogDirectoryZipAsStream(this Logger nLogger,
                                                                    [CallerMemberName] string memberName = "",
                                                                    [CallerFilePath] string filePath = "",
@@ -139,10 +139,12 @@ namespace PH.NlogExtensions
         #endregion
 
 
-        /// <summary>Reads the current log file.</summary>
-        /// <param name="nlogLogger">The nlog logger.</param>
-        /// <param name="targetFileName">Name of the target file.</param>
-        /// <returns></returns>
+        /// <summary>
+        /// Reads the contents of the current log file for a specific target as a string.
+        /// </summary>
+        /// <param name="nlogLogger">The NLog logger instance.</param>
+        /// <param name="targetFileName">The name of the target file.</param>
+        /// <returns>The log file contents as a string, or <c>null</c> if empty.</returns>
         public static string ReadCurrentLogFile(this Logger nlogLogger, string targetFileName)
         {
             var bytes = GetCurrentLogFile(nlogLogger, targetFileName);
@@ -154,16 +156,15 @@ namespace PH.NlogExtensions
             return Encoding.UTF8.GetString(bytes, 0, bytes.Length);
         }
 
-        /// <summary>Gets the current log file.</summary>
-        /// <param name="nlogLogger">The nlog logger.</param>
-        /// <param name="targetFileName">Name of the target file.</param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException">nlogLogger</exception>
-        /// <exception cref="ArgumentException">
-        ///     Value cannot be null or empty. - targetFileName
-        ///     or
-        ///     Not found target with name '{targetFileName}' - targetFileName
-        /// </exception>
+        /// <summary>
+        /// Gets the contents of the current log file for a specific target as a byte array.
+        /// </summary>
+        /// <param name="nlogLogger">The NLog logger instance.</param>
+        /// <param name="targetFileName">The name of the target file.</param>
+        /// <returns>The log file contents as a byte array.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="nlogLogger"/> is null.</exception>
+        /// <exception cref="ArgumentException">Thrown when <paramref name="targetFileName"/> is null or empty, or the target could not be found, or is not a FileTarget.</exception>
+        /// <exception cref="InvalidOperationException">Thrown when the NLog configuration is not initialized.</exception>
         public static byte[] GetCurrentLogFile(this Logger nlogLogger, string targetFileName)
         {
             if (nlogLogger is null)
@@ -203,9 +204,11 @@ namespace PH.NlogExtensions
             return GetCurrentLogFileByFileTarget(nlogLogger, fileTarget);
         }
 
-        /// <summary>Gets the log file by target.</summary>
+        /// <summary>
+        /// Resolves the <see cref="FileInfo"/> for the specified file target.
+        /// </summary>
         /// <param name="fileTarget">The file target.</param>
-        /// <returns></returns>
+        /// <returns>A <see cref="FileInfo"/> object for the target's log file.</returns>
         private static FileInfo GetLogFileByTarget(FileTarget fileTarget)
         {
             var getInfo  = new LogEventInfo { TimeStamp = DateTime.UtcNow, Level = LogLevel.Off };
@@ -216,15 +219,13 @@ namespace PH.NlogExtensions
             return new FileInfo(fileName);
         }
 
-        /// <summary>Gets the current log file by file target.</summary>
-        /// <param name="nlogLogger">The nlog logger.</param>
+        /// <summary>
+        /// Gets the current log file contents for the specified file target as a byte array.
+        /// </summary>
+        /// <param name="nlogLogger">The NLog logger instance.</param>
         /// <param name="fileTarget">The file target.</param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException">
-        ///     nlogLogger
-        ///     or
-        ///     fileTarget
-        /// </exception>
+        /// <returns>The log file contents as a byte array.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="nlogLogger"/> or <paramref name="fileTarget"/> is null.</exception>
         public static byte[] GetCurrentLogFileByFileTarget(this Logger nlogLogger, FileTarget fileTarget)
         {
             var r = GetCurrentDataAndFileInfoByFileTarget(nlogLogger, fileTarget);
@@ -232,6 +233,12 @@ namespace PH.NlogExtensions
         }
 
 
+        /// <summary>
+        /// Gets the current data and file info for a specific file target.
+        /// </summary>
+        /// <param name="nlogLogger">The NLog logger instance.</param>
+        /// <param name="fileTarget">The file target to read from.</param>
+        /// <returns>A tuple containing the file contents as a byte array and its <see cref="FileInfo"/>.</returns>
         private static (byte[] Data, FileInfo File) GetCurrentDataAndFileInfoByFileTarget(
             Logger nlogLogger, FileTarget fileTarget)
         {
@@ -263,10 +270,12 @@ namespace PH.NlogExtensions
             }
         }
 
-        /// <summary>Gets the current log files.</summary>
-        /// <param name="nlogLogger">The nlog logger.</param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException">nlogLogger</exception>
+        /// <summary>
+        /// Gets all current log files, mapped by their file names, as byte arrays.
+        /// </summary>
+        /// <param name="nlogLogger">The NLog logger instance.</param>
+        /// <returns>A dictionary of file names to log file contents.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="nlogLogger"/> is null.</exception>
         public static Dictionary<string, byte[]> GetAllCurrentLogFiles(this Logger nlogLogger)
         {
             var d = new Dictionary<string, byte[]>();
@@ -281,11 +290,11 @@ namespace PH.NlogExtensions
 
 
         /// <summary>
-        ///     Get all current log files
+        /// Gets all current log files, mapped by their <see cref="FileInfo"/>, as byte arrays.
         /// </summary>
-        /// <param name="nlogLogger">The nlog logger</param>
-        /// <returns>Dictionary with log files</returns>
-        /// <exception cref="ArgumentNullException"></exception>
+        /// <param name="nlogLogger">The NLog logger instance.</param>
+        /// <returns>A dictionary of <see cref="FileInfo"/> to log file contents.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="nlogLogger"/> is null.</exception>
         public static Dictionary<FileInfo, byte[]> GetAllCurrentLogFilesWithInfo(this Logger nlogLogger)
         {
             if (nlogLogger is null)
