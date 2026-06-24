@@ -1,32 +1,154 @@
 # PH.NlogExtensions
-PH.NlogExtensions is a library designed to extend the functionality of [NLog](https://nlog-project.org/), a popular logging framework for .NET applications. This library provides additional utilities for managing and compressing log files, making it easier to handle and archive logs in various scenarios.
-## Features
-- **Log File Compression**: Compress log files into ZIP archives for efficient storage and transfer.
-- **Integration with NLog**: Seamlessly integrates with NLog to retrieve and process log files.
-- **Async and Sync Support**: Provides both asynchronous and synchronous methods for log file operations.
-- **Custom Compression Utility**: Utilizes `PH.CompressionUtility` for enhanced compression capabilities.
-## Recent Changes
-- Replaced the deprecated `Ionic.Zip` library with `System.IO.Compression` and `PH.CompressionUtility`.
-- Improved memory management and performance during compression operations.
-- Simplified API for compressing log files.
-## Installation
-To include PH.NlogExtensions in your project, add the following NuGet package:
-## Code Examples
-**GetCurrentLogFile(string targetFileName)**
-```csharp
-//assume Logger is NLog.Logger
-// bytes is he content of current target named 'full'
-var bytes = await Logger.GetCurrentLogFileAsync("full");
 
+`PH.NlogExtensions` is a high-performance, lightweight .NET library that extends the [NLog](https://nlog-project.org/) framework with powerful log management, retrieval, and compression utilities. 
+
+Targeting `netstandard2.0`, it is fully compatible with both legacy .NET Framework applications (e.g., .NET 4.6.1+) and modern cross-platform .NET runtimes (e.g., .NET Core, .NET 5/6/7/8/9).
+
+---
+
+## Features
+
+- **Robust Target Unwrapping**: Supports wrapped targets (`WrapperTargetBase` targets like `AsyncWrapper`, `BufferingWrapper`, etc.) by recursively traversing down to the underlying `FileTarget`.
+- **Zip Compression**: Archive active log files or the entire log directory directly into ZIP streams or byte arrays using `System.IO.Compression` and `PH.CompressionUtility`.
+- **Asynchronous & Synchronous Support**: Every extension method offers both asynchronous (`*Async`) and synchronous variants.
+- **Easy Retrieval**: Access active log data as strings, byte arrays, or streams by specifying the NLog target name.
+
+---
+
+## Installation
+
+Add the library to your project via the dotnet CLI:
+
+```bash
+dotnet add package PH.NlogExtensions
 ```
-**CycleOverAllFileTargets()**
+
+Or by adding a package reference in your `.csproj`:
+
+```xml
+<PackageReference Include="PH.NlogExtensions" Version="x.y.z" />
+```
+
+---
+
+## Configuration Example
+
+Define your file targets in `nlog.config` (e.g., an asynchronous wrapper wrapping a file target):
+
+```xml
+<?xml version="1.0" encoding="utf-8" ?>
+<nlog xmlns="http://www.nlog-project.org/schemas/NLog.xsd"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+  <targets>
+    <!-- An asynchronous wrapper wrapping a File Target -->
+    <target xsi:type="AsyncWrapper" name="asyncFile">
+      <target xsi:type="File" name="myLogFile" fileName="logs/app-${shortdate}.log" />
+    </target>
+  </targets>
+
+  <rules>
+    <logger name="*" minlevel="Debug" writeTo="asyncFile" />
+  </rules>
+</nlog>
+```
+
+---
+
+## Usage Guide
+
+All methods are exposed as extension methods on the `NLog.Logger` class.
+
+### 1. Compressing & Archiving Log Files
+
+#### Get Current Active Log Files as ZIP Archive
+Compress all active log files into a ZIP archive:
+
 ```csharp
-//assume Logger is NLog.Logger
-// dict is a Dictionary<string,byte[]> where Key = TargetName and Value = content
-var dict = await Logger.GetAllCurrentLogFiles();
+using PH.NlogExtensions;
+
+// Asynchronous (Byte Array)
+byte[] zipBytes = await logger.GetCurrentLogFilesAsZipAsync(cancellationToken);
+
+// Asynchronous (MemoryStream)
+using (MemoryStream zipStream = await logger.GetCurrentLogFilesAsZipMemoryStreamAsync(cancellationToken))
+{
+    // Process stream...
+}
+
+// Synchronous (Byte Array)
+byte[] zipBytesSync = logger.GetCurrentLogFilesAsZip();
+
+// Synchronous (MemoryStream)
+using (MemoryStream zipStreamSync = logger.GetCurrentLogFilesAsZipMemoryStream())
+{
+    // Process stream...
+}
 ```
-**GetWholeLogDirectoryAsZip**
+
+#### Get the Entire Log Directory as a ZIP Archive
+Useful for archiving all logs in the directory including rotated or historical log files:
+
 ```csharp
-var bytes = Logger.GetWholeLogDirectoryAsZip();
-System.IO.File.WriteAllBytes($@".\lg{DateTime.Now:yymmddHHmmss}.zip", bytes);
+// Asynchronous (Byte Array)
+byte[] zipBytes = await logger.GetWholeLogDirectoryAsZipAsync();
+
+// Asynchronous (MemoryStream)
+using (MemoryStream zipStream = await logger.GetWholeLogDirectoryZipAsStreamAsync())
+{
+    // Process stream...
+}
+
+// Synchronous (Byte Array)
+byte[] zipBytesSync = logger.GetWholeLogDirectoryAsZip();
+
+// Synchronous (MemoryStream)
+using (MemoryStream zipStreamSync = logger.GetWholeLogDirectoryZipAsStream())
+{
+    // Process stream...
+}
 ```
+
+---
+
+### 2. Reading and Extracting Active Log Contents
+
+#### Read Single Log File by Target Name
+Retrieve the contents of a specific target's log file as a string or byte array:
+
+```csharp
+// Asynchronous - Read as String
+string logText = await logger.ReadCurrentLogFileAsync("myLogFile", cancellationToken);
+
+// Asynchronous - Get raw bytes
+byte[] logBytes = await logger.GetCurrentLogFileAsync("myLogFile", cancellationToken);
+
+// Synchronous - Read as String
+string logTextSync = logger.ReadCurrentLogFile("myLogFile");
+
+// Synchronous - Get raw bytes
+byte[] logBytesSync = logger.GetCurrentLogFile("myLogFile");
+```
+
+#### Read All Active Log Files
+Fetch all current log files configured in the active NLog configuration:
+
+```csharp
+// Asynchronous (Key: File Name, Value: Byte Content)
+Dictionary<string, byte[]> allLogs = await logger.GetAllCurrentLogFilesAsync(cancellationToken);
+
+// Asynchronous (Key: FileInfo, Value: Byte Content)
+Dictionary<FileInfo, byte[]> allLogsWithInfo = await logger.GetAllCurrentLogFilesWithInfoAsync(cancellationToken);
+
+// Synchronous (Key: File Name, Value: Byte Content)
+Dictionary<string, byte[]> allLogsSync = logger.GetAllCurrentLogFiles();
+
+// Synchronous (Key: FileInfo, Value: Byte Content)
+Dictionary<FileInfo, byte[]> allLogsWithInfoSync = logger.GetAllCurrentLogFilesWithInfo();
+```
+
+---
+
+## License
+
+This project is licensed under the BSD-3-Clause License. See the [LICENSE](LICENSE) file for details.
