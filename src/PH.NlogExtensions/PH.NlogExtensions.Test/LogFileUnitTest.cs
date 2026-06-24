@@ -51,11 +51,11 @@ namespace PH.NlogExtensions.Test
         z.Dispose();
         
         Guid g = Guid.NewGuid();
-        System.IO.File.WriteAllBytes($".\\{g}.zip", d);
+        System.IO.File.WriteAllBytes($"./{g}.zip", d);
 
         Assert.NotEmpty(d);
 
-        Assert.Equal(2, count);
+        Assert.Equal(3, count);
 
 
 	    }
@@ -71,23 +71,25 @@ namespace PH.NlogExtensions.Test
 
            
 
-            Assert.True(d.Keys.Count == 2);
+            Assert.True(d.Keys.Count == 3);
         }
 
         [Fact]
         public void TestEmptyLogger()
         {
-
-            var file = new FileInfo(@".\logs/log.log");
-            file.Delete();
-
-
+            var file = new FileInfo(@"logs/log.log");
+            if (file.Directory != null && file.Directory.Exists)
+            {
+                if (file.Exists)
+                {
+                    file.Delete();
+                }
+            }
 
             var bytes      = Logger.GetCurrentLogFileAsync("full", token).GetAwaiter().GetResult();
             var stringText = Logger.ReadCurrentLogFileAsync("full", token).GetAwaiter().GetResult();
             Assert.True(bytes.Length == 0);
             Assert.True(stringText == null);
-
         }
 
         [Fact]
@@ -96,7 +98,7 @@ namespace PH.NlogExtensions.Test
             Logger.Info("A message");
 
             var bytes = Logger.GetWholeLogDirectoryAsZipAsync().GetAwaiter().GetResult();
-            System.IO.File.WriteAllBytes($@".\lg{DateTime.Now:yymmddHHmmss}.zip", bytes);
+            System.IO.File.WriteAllBytes($@"./lg{DateTime.Now:yymmddHHmmss}.zip", bytes);
             
             Assert.NotNull(bytes);
             Assert.True(bytes.Length > 0);
@@ -177,5 +179,30 @@ namespace PH.NlogExtensions.Test
 
         }
 
+        [Fact]
+        public void GetWrappedCurrentLogFile()
+        {
+            Logger.Info("A wrapped message log event");
+            LogManager.Flush(); // Ensure async wrapper flushes to file
+
+            var bytes = Logger.GetCurrentLogFileAsync("wrappedFile", token).GetAwaiter().GetResult();
+            var stringText = Logger.ReadCurrentLogFileAsync("wrappedFile", token).GetAwaiter().GetResult();
+
+            Assert.NotEmpty(bytes);
+            Assert.Contains("A wrapped message log event", stringText);
+        }
+
+        [Fact]
+        public void GetWrappedCurrentLogFile_Sync()
+        {
+            Logger.Info("Another wrapped message");
+            LogManager.Flush();
+
+            var bytes = Logger.GetCurrentLogFile("wrappedFile");
+            var stringText = Logger.ReadCurrentLogFile("wrappedFile");
+
+            Assert.NotEmpty(bytes);
+            Assert.Contains("Another wrapped message", stringText);
+        }
     }
 }

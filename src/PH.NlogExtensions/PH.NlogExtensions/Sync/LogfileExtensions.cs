@@ -1,4 +1,4 @@
-﻿#region
+#region
 
 using System;
 using System.Collections.Generic;
@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using NLog;
 using NLog.Targets;
+using NLog.Targets.Wrappers;
 using PH.CompressionUtility;
 
 #endregion
@@ -106,26 +107,32 @@ namespace PH.NlogExtensions
                 throw new ArgumentNullException(nameof(nLogger));
             }
 
-            var d = new Dictionary<string, DirectoryInfo>();
-            foreach (var configurationAllTarget in LogManager.Configuration.AllTargets)
+            var config = LogManager.Configuration;
+            if (config != null)
             {
-                if (configurationAllTarget is FileTarget fileTarget)
+                var d = new Dictionary<string, DirectoryInfo>();
+                var processed = new HashSet<FileTarget>();
+                foreach (var configurationAllTarget in config.AllTargets)
                 {
-                    var file = GetLogFileByTarget(fileTarget);
-                    if (file.Exists && null != file.Directory && file.Directory.Exists)
+                    var fileTarget = GetFileTarget(configurationAllTarget);
+                    if (fileTarget != null && processed.Add(fileTarget))
                     {
-                        if (!d.ContainsKey(file.Directory.FullName))
+                        var file = GetLogFileByTarget(fileTarget);
+                        if (null != file.Directory && file.Directory.Exists)
                         {
-                            d.Add(file.Directory.FullName, file.Directory);
+                            if (!d.ContainsKey(file.Directory.FullName))
+                            {
+                                d.Add(file.Directory.FullName, file.Directory);
+                            }
                         }
                     }
                 }
-            }
 
-            var zip = d.Select(x => x.Value).ToZipStreamAsync(CancellationToken.None).GetAwaiter().GetResult();
-            zip.Position = 0;
-            zip.CopyTo(memory);
-            memory.Position = 0;
+                var zip = d.Select(x => x.Value).ToZipStreamAsync(CancellationToken.None).GetAwaiter().GetResult();
+                zip.Position = 0;
+                zip.CopyTo(memory);
+                memory.Position = 0;
+            }
             return memory;
         }
 
@@ -169,12 +176,27 @@ namespace PH.NlogExtensions
                 throw new ArgumentException("Value cannot be null or empty.", nameof(targetFileName));
             }
 
-            var fileTarget = (FileTarget)LogManager.Configuration.FindTargetByName(targetFileName);
-            if (null == fileTarget)
+            var config = LogManager.Configuration;
+            if (config is null)
+            {
+                throw new InvalidOperationException("NLog configuration is not initialized.");
+            }
+
+            var target = config.FindTargetByName(targetFileName);
+            if (target is null)
             {
                 nlogLogger?.Trace("Not found target with name {TargetFileName}: begin throw new ArgumentException",
                                   targetFileName);
                 throw new ArgumentException($"Not found target with name '{targetFileName}'",
+                                            nameof(targetFileName));
+            }
+
+            var fileTarget = GetFileTarget(target);
+            if (fileTarget is null)
+            {
+                nlogLogger?.Trace("Target with name {TargetFileName} is not a FileTarget or does not wrap a FileTarget: begin throw new ArgumentException",
+                                  targetFileName);
+                throw new ArgumentException($"Target with name '{targetFileName}' is not a FileTarget or does not wrap a FileTarget",
                                             nameof(targetFileName));
             }
 
@@ -272,12 +294,18 @@ namespace PH.NlogExtensions
             }
 
             var d = new Dictionary<FileInfo, byte[]>();
-            foreach (var configurationAllTarget in LogManager.Configuration.AllTargets)
+            var processed = new HashSet<FileTarget>();
+            var config = LogManager.Configuration;
+            if (config != null)
             {
-                if (configurationAllTarget is FileTarget fileTarget)
+                foreach (var configurationAllTarget in config.AllTargets)
                 {
-                    var data = GetCurrentDataAndFileInfoByFileTarget(nlogLogger, fileTarget);
-                    d.Add(data.File, data.Data);
+                    var fileTarget = GetFileTarget(configurationAllTarget);
+                    if (fileTarget != null && processed.Add(fileTarget))
+                    {
+                        var data = GetCurrentDataAndFileInfoByFileTarget(nlogLogger, fileTarget);
+                        d.Add(data.File, data.Data);
+                    }
                 }
             }
 
